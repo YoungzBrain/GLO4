@@ -2,6 +2,7 @@ package com.example.glo4.Screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -10,11 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,11 +26,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.glo4.Components.BottomNavigationBar
+import com.example.glo4.UserPreferences
 import com.example.glo4.purpleColor
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val userPreferences = remember { UserPreferences(context) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -62,7 +72,20 @@ fun ProfileScreen(navController: NavController) {
                     MenuItem(Icons.Default.FileDownload, "Téléchargements")
                     MenuItem(Icons.Default.Settings, "Paramètres")
                     MenuItem(Icons.Default.HelpOutline, "Aide et support")
-                    MenuItem(Icons.Default.Logout, "Se déconnecter", isLast = true, textColor = Color.Red)
+                    MenuItem(
+                        icon = Icons.Default.Logout,
+                        title = "Se déconnecter",
+                        isLast = true,
+                        textColor = Color.Red,
+                        onClick = {
+                            scope.launch {
+                                userPreferences.clearUser()
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -128,11 +151,18 @@ fun StatBox(value: String, label: String) {
 }
 
 @Composable
-fun MenuItem(icon: ImageVector, title: String, isLast: Boolean = false, textColor: Color = Color.Black) {
+fun MenuItem(
+    icon: ImageVector,
+    title: String,
+    isLast: Boolean = false,
+    textColor: Color = Color.Black,
+    onClick: () -> Unit = {}
+) {
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClick() }
                 .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -162,15 +192,3 @@ fun MenuItem(icon: ImageVector, title: String, isLast: Boolean = false, textColo
 fun ProfileScreenPreview() {
     ProfileScreen(navController = rememberNavController())
 }
-/*
-@Preview(showBackground = true)
-@Composable
-fun ProfileHeaderPreview() {
-    ProfileHeader()
-}*/
-/*
-@Preview(showBackground = true)
-@Composable
-fun StatsRowPreview() {
-    StatsRow()
-}*/

@@ -13,10 +13,14 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,12 +30,17 @@ import androidx.navigation.compose.rememberNavController
 import com.example.glo4.Components.BottomNavigationBar
 import com.example.glo4.Components.CategoryItem
 import com.example.glo4.Course
+import com.example.glo4.UserPreferences
 import com.example.glo4.categories
 import com.example.glo4.courses
 import com.example.glo4.purpleColor
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
+    val username by userPreferences.getUsername.collectAsState(initial = "Invité")
+
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController)
@@ -43,7 +52,7 @@ fun HomeScreen(navController: NavController) {
                 .padding(innerPadding)
         ) {
             item {
-                HomeHeader()
+                HomeHeader(username ?: "Invité")
             }
             item {
                 SectionHeader(title = "Mes cours récents")
@@ -71,7 +80,7 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(username: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,7 +101,7 @@ fun HomeHeader() {
                         fontSize = 16.sp
                     )
                     Text(
-                        text = "Yem Brian",
+                        text = username,
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
